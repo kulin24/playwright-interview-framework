@@ -239,26 +239,29 @@ jobs:
       - name: List downloaded artifacts
         run: ls -la all-artifacts/
       
-      - name: Find and merge reports
+      - name: Prepare reports directory
         run: |
-          # Find all report directories
-          REPORT_DIRS=$(find all-artifacts -name "playwright-report" -type d)
+          # Create a directory for all reports
+          mkdir -p merged-reports
           
-          if [ -n "$REPORT_DIRS" ]; then
-            echo "Found report directories:"
-            echo "$REPORT_DIRS"
-            
-            # Install playwright if needed
-            npm install -D @playwright/test
-            
-            # Merge reports by passing each directory as a separate argument
-            npx playwright merge-reports $REPORT_DIRS
-          else
-            echo "No report directories found to merge"
-            # Create an empty report if none exist
-            mkdir -p playwright-report
-            echo "<html><body><h1>No test reports available</h1></body></html>" > playwright-report/index.html
-          fi
+          # Copy all report contents into merged-reports
+          find all-artifacts -name "playwright-report" -type d | while read report; do
+            echo "Copying report from: $report"
+            # Copy the contents of each report directory
+            cp -r "$report"/* merged-reports/ 2>/dev/null || true
+          done
+          
+          # Verify files were copied
+          echo "Files in merged-reports:"
+          ls -la merged-reports/
+    
+      - name: Generate combined report
+        run: |
+          # Install playwright if needed
+          npm install -D @playwright/test
+          
+          # Create a combined report from the merged-reports directory
+          npx playwright merge-reports merged-reports
       
       - name: Upload combined report
         uses: actions/upload-artifact@v4
