@@ -27,4 +27,4 @@ auth.json
 Thumbs.db
 
 # Package lock (optional - some teams commit it, some don't)
-package-lock.json
+#package-lock.json
