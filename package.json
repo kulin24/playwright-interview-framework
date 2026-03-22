@@ -1,0 +1,35 @@
+{
+  "name": "playwright-interview-framework",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "DEBUG_MODE=true playwright test --headed --debug",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:ui": "playwright test --grep @ui",
+    "test:api": "playwright test --grep @api",
+    "test:regression": "playwright test --grep @regression",
+    "test:debug:ui": "DEBUG_MODE=true playwright test --project=debug-ui --headed",
+    "debug:trace": "npx playwright show-trace",
+    "report": "npx playwright show-report",
+    "ci:lint": "npx tsc --noEmit && npx eslint . --ext .ts",
+    "ci:smoke": "npx playwright test --grep @smoke --workers=2",
+    "ci:ui": "npx playwright test --grep @ui --workers=4",
+    "ci:api": "npx playwright test --grep @api",
+    "ci:regression": "npx playwright test --grep @regression --workers=4",
+    "ci:all": "npm run ci:lint && npm run ci:smoke && npm run ci:ui && npm run ci:api"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0",
+    "dotenv": "^17.3.1",
+    "typescript": "^5.9.3",
+    "winston": "^3.19.0"
+  }
+}
