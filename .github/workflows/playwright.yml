@@ -219,52 +219,51 @@ jobs:
             test-results/
           retention-days: 14
 
-  # JOB 6: Report (combine all test results)
-  # JOB 6: Report (simple - just upload all reports)
-report:
-  name: Upload Test Reports
-  runs-on: ubuntu-latest
-  needs: [smoke, ui-tests, api-tests, regression]
-  if: always()
-  timeout-minutes: 10
-  
-  steps:
-    - name: Download all test artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: all-artifacts
+  # JOB 6: Report 
+  report:
+    name: Upload Test Reports
+    runs-on: ubuntu-latest
+    needs: [smoke, ui-tests, api-tests, regression]
+    if: always()
+    timeout-minutes: 10
     
-    - name: Create summary page
-      run: |
-        # Create a simple HTML summary
-        cat > summary.html << 'EOF'
-        <html>
-        <head><title>Test Reports Summary</title></head>
-        <body>
-        <h1>Test Execution Reports</h1>
-        <p>Download the artifacts below to view individual test reports.</p>
-        <ul>
-        EOF
-        
-        # List all reports
-        find all-artifacts -name "playwright-report" -type d | while read report; do
-          name=$(basename $(dirname $report))
-          echo "<li><strong>$name</strong> - Download artifact to view report</li>" >> summary.html
-        done
-        
-        echo "</ul></body></html>" >> summary.html
-        
-        # Upload summary as step output
-        echo "### Test Reports Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Download the 'all-test-reports' artifact to view individual test reports." >> $GITHUB_STEP_SUMMARY
-    
-    - name: Upload all reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: all-test-reports
-        path: all-artifacts/
-        retention-days: 30
+    steps:
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+      
+      - name: Create summary page
+        run: |
+          # Create a simple HTML summary
+          cat > summary.html << 'EOF'
+          <html>
+          <head><title>Test Reports Summary</title></head>
+          <body>
+          <h1>Test Execution Reports</h1>
+          <p>Download the artifacts below to view individual test reports.</p>
+          <ul>
+          EOF
+          
+          # List all reports
+          find all-artifacts -name "playwright-report" -type d | while read report; do
+            name=$(basename $(dirname $report))
+            echo "<li><strong>$name</strong> - Download artifact to view report</li>" >> summary.html
+          done
+          
+          echo "</ul></body></html>" >> summary.html
+          
+          # Upload summary as step output
+          echo "### Test Reports Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download the 'all-test-reports' artifact to view individual test reports." >> $GITHUB_STEP_SUMMARY
+      
+      - name: Upload all reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-test-reports
+          path: all-artifacts/
+          retention-days: 30
 
   # JOB 7: Performance Check (optional)
   performance:
