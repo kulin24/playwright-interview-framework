@@ -220,63 +220,51 @@ jobs:
           retention-days: 14
 
   # JOB 6: Report (combine all test results)
-  report:
-    name: Generate Combined Report
-    runs-on: ubuntu-latest
-    needs: [smoke, ui-tests, api-tests, regression]
-    if: always()  # Always run to generate report
-    timeout-minutes: 10
+  # JOB 6: Report (simple - just upload all reports)
+report:
+  name: Upload Test Reports
+  runs-on: ubuntu-latest
+  needs: [smoke, ui-tests, api-tests, regression]
+  if: always()
+  timeout-minutes: 10
+  
+  steps:
+    - name: Download all test artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: all-artifacts
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Download all test artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: all-artifacts
-      
-      - name: List downloaded artifacts
-        run: ls -la all-artifacts/
-      
-      - name: Prepare reports directory
-        run: |
-          # Create a directory for all reports
-          mkdir -p merged-reports
-          
-          # Copy all report contents into merged-reports
-          find all-artifacts -name "playwright-report" -type d | while read report; do
-            echo "Copying report from: $report"
-            # Copy the contents of each report directory
-            cp -r "$report"/* merged-reports/ 2>/dev/null || true
-          done
-          
-          # Verify files were copied
-          echo "Files in merged-reports:"
-          ls -la merged-reports/
+    - name: Create summary page
+      run: |
+        # Create a simple HTML summary
+        cat > summary.html << 'EOF'
+        <html>
+        <head><title>Test Reports Summary</title></head>
+        <body>
+        <h1>Test Execution Reports</h1>
+        <p>Download the artifacts below to view individual test reports.</p>
+        <ul>
+        EOF
+        
+        # List all reports
+        find all-artifacts -name "playwright-report" -type d | while read report; do
+          name=$(basename $(dirname $report))
+          echo "<li><strong>$name</strong> - Download artifact to view report</li>" >> summary.html
+        done
+        
+        echo "</ul></body></html>" >> summary.html
+        
+        # Upload summary as step output
+        echo "### Test Reports Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Download the 'all-test-reports' artifact to view individual test reports." >> $GITHUB_STEP_SUMMARY
     
-      - name: Generate combined report
-        run: |
-          # Install playwright if needed
-          npm install -D @playwright/test
-          
-          # Create a combined report from the merged-reports directory
-          npx playwright merge-reports merged-reports
-      
-      - name: Upload combined report
-        uses: actions/upload-artifact@v4
-        with:
-          name: combined-test-report
-          path: playwright-report/
-          retention-days: 30
-      
-      - name: Deploy to GitHub Pages (optional)
-        if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playwright-report
-          destination_dir: test-reports/${{ github.run_number }}
+    - name: Upload all reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: all-test-reports
+        path: all-artifacts/
+        retention-days: 30
 
   # JOB 7: Performance Check (optional)
   performance:
