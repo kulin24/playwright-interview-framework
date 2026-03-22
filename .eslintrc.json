@@ -32,7 +32,8 @@
     "no-console": ["warn", { "allow": ["error", "warn", "info"] }],
     "no-undef": "off",
     "@typescript-eslint/no-empty-object-type": "off",
-    "no-unused-vars": "off"
+    "no-unused-vars": "off",
+    "no-empty-pattern": "off"
   },
   "ignorePatterns": [
     "node_modules/",

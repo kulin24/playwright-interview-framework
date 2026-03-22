@@ -34,7 +34,7 @@ export const test = base.extend<MyFixtures, MyWorkerFixtures>({
   },
 
   // Test user data
-  testUser: async (_, use) => {
+  testUser: async ({}, use) => {
     const user = {
       username: 'standard_user',
       password: 'secret_sauce',
@@ -44,7 +44,7 @@ export const test = base.extend<MyFixtures, MyWorkerFixtures>({
   },
 
   // Random data for uniqueness
-  randomData: async (_, use) => {
+  randomData: async ({}, use) => {
     const data = {
       id: Date.now(),
       timestamp: new Date().toISOString(),
@@ -54,35 +54,30 @@ export const test = base.extend<MyFixtures, MyWorkerFixtures>({
   },
 
   authenticatedContext: [
-    async ({ browser }, use) => {
-      // Check if we have saved auth state
-      if (fs.existsSync(authFile)) {
-        console.info('🔄 [Worker] Reusing existing authentication');
-        const context = await browser.newContext({ storageState: authFile });
-        await use(context);
-        await context.close();
-        return;
-      }
-
-      // First time in this worker - perform login
-      console.info('🔐 [Worker] Creating fresh authentication');
-      const page = await browser.newPage();
-      await page.goto('https://www.saucedemo.com/');
-      await page.fill('#user-name', 'standard_user');
-      await page.fill('#password', 'secret_sauce');
-      await page.click('#login-button');
-      await page.waitForURL(/inventory\.html/);
-      
-      // Save the authenticated state
-      await page.context().storageState({ path: authFile });
-      await page.close();
-      
-      // Create and use the authenticated context
-      const context = await browser.newContext({ storageState: authFile });
-      await use(context);
-      await context.close();
+  async ({ browser }, use) => {
+    // Always create fresh authentication - no reuse
+    console.info('🔐 [Worker] Creating fresh authentication');
+    
+    const page = await browser.newPage();
+    await page.goto('https://www.saucedemo.com/');
+    await page.fill('#user-name', 'standard_user');
+    await page.fill('#password', 'secret_sauce');
+    await page.click('#login-button');
+    await page.waitForURL(/inventory\.html/, { timeout: 10000 });
+    
+    console.info('✅ [Worker] Login successful');
+    
+    // Optional: Save auth state if you want it for debugging
+    await page.context().storageState({ path: authFile });
+    
+    await page.close();
+    
+    // Create context with the fresh auth
+    const context = await browser.newContext({ storageState: authFile });
+    await use(context);
+    await context.close();
     },
-    { scope: 'worker' as const }
+    { scope: 'worker' }
   ],
 
   // Test-scoped page that uses the worker-scoped context

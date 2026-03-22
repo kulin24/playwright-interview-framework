@@ -81,7 +81,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       
       - name: Run smoke tests
-        run: npx playwright test --grep @smoke --project=chromium
+        run: npx playwright test --grep @smoke --project=ui-chrome
         env:
           TEST_ENV: qa
       
@@ -123,7 +123,7 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.browser }}
       
       - name: Run UI tests
-        run: npx playwright test --grep @ui --project=${{ matrix.browser }}
+        run: npx playwright test --grep @ui --project=ui-chrome
         env:
           TEST_ENV: qa
       
@@ -204,7 +204,7 @@ jobs:
         run: |
           npx playwright test \
             --grep @regression \
-            --project=chromium \
+            --project=ui-chrome \
             --shard=${{ matrix.shard }}/3
         env:
           TEST_ENV: qa
