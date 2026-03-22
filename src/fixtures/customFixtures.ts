@@ -2,7 +2,6 @@ import { test as base, Page, BrowserContext } from '@playwright/test';
 import { LoginPage } from '../pages/ui/LoginPage';
 import { ApiClient } from '../pages/api/ApiClient';
 import path from 'path';
-import fs from 'fs';
 
 type MyFixtures = {
   loginPage: LoginPage;
