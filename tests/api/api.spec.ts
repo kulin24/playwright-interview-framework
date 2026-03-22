@@ -17,7 +17,7 @@ test.describe('API Tests @regression', () => {
     expect(data.id).toBe(1);
     expect(data.title).toBeDefined();
     
-    console.log('✅ GET test passed:', data.title);
+    console.info('✅ GET test passed:', data.title);
   });
   
   test('POST - create a new post @api', async ({ request }) => {
@@ -37,7 +37,7 @@ test.describe('API Tests @regression', () => {
     expect(data.id).toBeDefined();
     expect(data.title).toBe(newPost.title);
     
-    console.log('✅ POST test passed: Created post with ID', data.id);
+    console.info('✅ POST test passed: Created post with ID', data.id);
   });
   
   test('GET - verify posts array @api', async ({ request }) => {
@@ -58,6 +58,6 @@ test.describe('API Tests @regression', () => {
     expect(firstPost).toHaveProperty('body');
     expect(firstPost).toHaveProperty('userId');
     
-    console.log('✅ GET array test passed:', posts.length, 'posts found');
+    console.info('✅ GET array test passed:', posts.length, 'posts found');
   });
 });

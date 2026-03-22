@@ -18,13 +18,13 @@ const authFile = path.join(__dirname, '../auth.json');
 
 export const test = base.extend<MyFixtures, MyWorkerFixtures>({
   loginPage: async ({ page }, use, testInfo) => {
-    console.log(`Starting test: ${testInfo.title}`);
+    console.info(`Starting test: ${testInfo.title}`);
     const loginPage = new LoginPage(page);
     await page.goto('https://www.saucedemo.com/');
     
     await use(loginPage);
 
-    console.log(`Test finished: ${testInfo.status}`);
+    console.info(`Test finished: ${testInfo.status}`);
     await loginPage.takeScreenshot('teardown');
   },
 
@@ -34,7 +34,7 @@ export const test = base.extend<MyFixtures, MyWorkerFixtures>({
   },
 
   // Test user data
-  testUser: async ({}, use) => {
+  testUser: async (_, use) => {
     const user = {
       username: 'standard_user',
       password: 'secret_sauce',
@@ -44,7 +44,7 @@ export const test = base.extend<MyFixtures, MyWorkerFixtures>({
   },
 
   // Random data for uniqueness
-  randomData: async ({}, use) => {
+  randomData: async (_, use) => {
     const data = {
       id: Date.now(),
       timestamp: new Date().toISOString(),
@@ -57,7 +57,7 @@ export const test = base.extend<MyFixtures, MyWorkerFixtures>({
     async ({ browser }, use) => {
       // Check if we have saved auth state
       if (fs.existsSync(authFile)) {
-        console.log('🔄 [Worker] Reusing existing authentication');
+        console.info('🔄 [Worker] Reusing existing authentication');
         const context = await browser.newContext({ storageState: authFile });
         await use(context);
         await context.close();
@@ -65,7 +65,7 @@ export const test = base.extend<MyFixtures, MyWorkerFixtures>({
       }
 
       // First time in this worker - perform login
-      console.log('🔐 [Worker] Creating fresh authentication');
+      console.info('🔐 [Worker] Creating fresh authentication');
       const page = await browser.newPage();
       await page.goto('https://www.saucedemo.com/');
       await page.fill('#user-name', 'standard_user');
@@ -90,7 +90,7 @@ export const test = base.extend<MyFixtures, MyWorkerFixtures>({
     const page = await authenticatedContext.newPage();
     await page.goto('https://www.saucedemo.com/inventory.html');
     
-    console.log(`📄 [Test] ${testInfo.title} using authenticated page`);
+    console.info(`📄 [Test] ${testInfo.title} using authenticated page`);
     
     await use(page);
     

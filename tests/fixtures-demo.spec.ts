@@ -5,7 +5,7 @@ test.describe('Custom Fixtures Demo @regression', () => {
     // loginPage is already at SauceDemo login page
     await loginPage.login('standard_user', 'secret_sauce');
     await loginPage.expectSuccessfulLogin();
-    console.log('✅ Login page fixture worked!');
+    console.info('✅ Login page fixture worked!');
   });
 
   test('@api should use apiClient fixture', async ({ apiClient }) => {
@@ -13,7 +13,7 @@ test.describe('Custom Fixtures Demo @regression', () => {
     expect(response.status()).toBe(200);
     const data = await response.json();
     expect(data.id).toBe(1);
-    console.log('✅ API client fixture worked!');
+    console.info('✅ API client fixture worked!');
   });
 
   test('should use authenticatedPage fixture', async ({ authenticatedPage }) => {
@@ -24,13 +24,13 @@ test.describe('Custom Fixtures Demo @regression', () => {
     await authenticatedPage.click('[data-test="add-to-cart-sauce-labs-backpack"]');
     const cartBadge = authenticatedPage.locator('[data-test="shopping-cart-badge"]');
     await expect(cartBadge).toHaveText('1');
-    console.log('✅ Authenticated page fixture worked!');
+    console.info('✅ Authenticated page fixture worked!');
   });
 
   test('should use testUser fixture', async ({ loginPage, testUser }) => {
-    console.log(`Testing with user: ${testUser.username}`);
+    console.info(`Testing with user: ${testUser.username}`);
     await loginPage.login(testUser.username, testUser.password);
     await loginPage.expectSuccessfulLogin();
-    console.log('✅ Test user fixture worked!');
+    console.info('✅ Test user fixture worked!');
   });
 });
