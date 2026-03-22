@@ -220,60 +220,60 @@ jobs:
           retention-days: 14
 
   # JOB 6: Report (combine all test results)
-report:
-  name: Generate Combined Report
-  runs-on: ubuntu-latest
-  needs: [smoke, ui-tests, api-tests, regression]
-  if: always()  # Always run to generate report
-  timeout-minutes: 10
-  
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  report:
+    name: Generate Combined Report
+    runs-on: ubuntu-latest
+    needs: [smoke, ui-tests, api-tests, regression]
+    if: always()  # Always run to generate report
+    timeout-minutes: 10
     
-    - name: Download all test artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: all-artifacts
-    
-    - name: List downloaded artifacts
-      run: ls -la all-artifacts/
-    
-    - name: Find and merge reports
-      run: |
-        # Find all report directories
-        REPORT_DIRS=$(find all-artifacts -name "playwright-report" -type d)
-        
-        if [ -n "$REPORT_DIRS" ]; then
-          echo "Found report directories:"
-          echo "$REPORT_DIRS"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+      
+      - name: List downloaded artifacts
+        run: ls -la all-artifacts/
+      
+      - name: Find and merge reports
+        run: |
+          # Find all report directories
+          REPORT_DIRS=$(find all-artifacts -name "playwright-report" -type d)
           
-          # Install playwright if needed
-          npm install -D @playwright/test
-          
-          # Merge reports by passing each directory as a separate argument
-          npx playwright merge-reports $REPORT_DIRS
-        else
-          echo "No report directories found to merge"
-          # Create an empty report if none exist
-          mkdir -p playwright-report
-          echo "<html><body><h1>No test reports available</h1></body></html>" > playwright-report/index.html
-        fi
-    
-    - name: Upload combined report
-      uses: actions/upload-artifact@v4
-      with:
-        name: combined-test-report
-        path: playwright-report/
-        retention-days: 30
-    
-    - name: Deploy to GitHub Pages (optional)
-      if: github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./playwright-report
-        destination_dir: test-reports/${{ github.run_number }}
+          if [ -n "$REPORT_DIRS" ]; then
+            echo "Found report directories:"
+            echo "$REPORT_DIRS"
+            
+            # Install playwright if needed
+            npm install -D @playwright/test
+            
+            # Merge reports by passing each directory as a separate argument
+            npx playwright merge-reports $REPORT_DIRS
+          else
+            echo "No report directories found to merge"
+            # Create an empty report if none exist
+            mkdir -p playwright-report
+            echo "<html><body><h1>No test reports available</h1></body></html>" > playwright-report/index.html
+          fi
+      
+      - name: Upload combined report
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-test-report
+          path: playwright-report/
+          retention-days: 30
+      
+      - name: Deploy to GitHub Pages (optional)
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          destination_dir: test-reports/${{ github.run_number }}
 
   # JOB 7: Performance Check (optional)
   performance:
